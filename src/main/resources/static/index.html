@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý sinh viên - 10 Điểm</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="container mt-4">
+
+    <h2 class="text-center text-primary mb-4">HỆ THỐNG QUẢN LÝ SINH VIÊN</h2>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Tìm theo tên (Yêu cầu 10):</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Nhập tên..." onkeyup="searchByName()">
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Tìm theo ID:</label>
+            <div class="input-group">
+                <input type="number" id="searchID" class="form-control" placeholder="Nhập ID...">
+                <button class="btn btn-secondary" onclick="searchByID()">Tìm ID</button>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-hover table-bordered bg-white">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Tên</th>
+                <th>Email</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+
+    <hr>
+
+    <div class="card p-3">
+        <h4 id="formTitle">Thêm sinh viên mới</h4>
+        <input type="hidden" id="studentId"> 
+        <div class="mb-2">
+            <input id="name" class="form-control" placeholder="Tên sinh viên">
+        </div>
+        <div class="mb-2">
+            <input id="email" class="form-control" placeholder="Email">
+        </div>
+        <div id="actionButtons">
+            <button class="btn btn-primary" onclick="addStudent()">Thêm mới</button>
+        </div>
+    </div>
+
+<script>
+    const API = "http://localhost:8080/api/students";
+
+    // Yêu cầu 7 (1đ): Load danh sách
+    function loadStudents() {
+        fetch(API)
+            .then(res => res.json())
+            .then(data => renderTable(data))
+            .catch(err => console.error("Lỗi:", err));
+    }
+
+    function renderTable(data) {
+        let html = "";
+        const list = Array.isArray(data) ? data : [data]; 
+        list.forEach(s => {
+            if(!s) return;
+            html += `
+            <tr>
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.email}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="editStudent(${s.id}, '${s.name}', '${s.email}')">Sửa</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteStudent(${s.id})">Xóa</button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById("studentTable").innerHTML = html;
+    }
+
+    // Tìm kiếm
+    function searchByName() {
+        const name = document.getElementById("searchName").value;
+        fetch(`${API}/search?name=${name}`).then(res => res.json()).then(renderTable);
+    }
+    function searchByID() {
+        const id = document.getElementById("searchID").value;
+        if(!id) return loadStudents();
+        fetch(`${API}/${id}`).then(res => res.json()).then(renderTable).catch(() => alert("Không tìm thấy!"));
+    }
+
+    // Yêu cầu 10 (0.5đ): Thêm mới
+    function addStudent() {
+        const student = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value
+        };
+        fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(student)
+        }).then(() => { clearForm(); loadStudents(); });
+    }
+
+    // Yêu cầu 9 (1đ): Cập nhật sinh viên
+    function editStudent(id, name, email) {
+        document.getElementById("formTitle").innerText = "Cập nhật sinh viên ID: " + id;
+        document.getElementById("studentId").value = id;
+        document.getElementById("name").value = name;
+        document.getElementById("email").value = email;
+        document.getElementById("actionButtons").innerHTML = `
+            <button class="btn btn-success" onclick="saveUpdate()">Lưu thay đổi</button>
+            <button class="btn btn-light" onclick="clearForm()">Hủy</button>
+        `;
+    }
+
+    function saveUpdate() {
+        const id = document.getElementById("studentId").value;
+        const student = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value
+        };
+        // SỬA: Gọi đúng đường dẫn /update/{id}
+        fetch(`${API}/update/${id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(student)
+        }).then(() => { clearForm(); loadStudents(); });
+    }
+
+    // Yêu cầu 8 (1đ): Xóa sinh viên
+    function deleteStudent(id) {
+        if(confirm("Bạn có chắc muốn xóa?")) {
+            // SỬA: Gọi đúng đường dẫn /delete/{id} và Method POST
+            fetch(`${API}/delete/${id}`, { method: "POST" })
+                .then(() => loadStudents());
+        }
+    }
+
+    function clearForm() {
+        document.getElementById("formTitle").innerText = "Thêm sinh viên mới";
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("actionButtons").innerHTML = `<button class="btn btn-primary" onclick="addStudent()">Thêm mới</button>`;
+    }
+
+    loadStudents();
+</script>
+</body>
+</html>
