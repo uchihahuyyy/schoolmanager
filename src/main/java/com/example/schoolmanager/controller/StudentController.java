@@ -8,7 +8,7 @@ import com.example.schoolmanager.model.Student;
 
 @RestController
 @RequestMapping("/api/students")
-@CrossOrigin 
+@CrossOrigin
 public class StudentController {
 
     @Autowired
@@ -45,7 +45,7 @@ public class StudentController {
     public List<Student> getAllStudents() {
         return service.getAll();
     }
-    
+
     // Yêu cầu 6 (1đ): API cập nhật (@PostMapping("/update/{id}"))
     // LƯU Ý: Đề bắt dùng POST và đường dẫn /update/{id}
     @PostMapping("/update/{id}")

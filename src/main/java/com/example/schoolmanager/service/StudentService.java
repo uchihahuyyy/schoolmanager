@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.schoolmanager.model.Student;
-import com.example.schoolmanager.respository.StudentRepository;
+import com.example.schoolmanager.repository.StudentRepository;
 
 @Service
 public class StudentService {

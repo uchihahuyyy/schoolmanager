@@ -1,4 +1,4 @@
-package com.example.schoolmanager.respository;
+package com.example.schoolmanager.repository;
 
 import java.util.List;
 
